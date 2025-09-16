@@ -119,7 +119,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 * [Dario Correal][dariocorreal-url] is the original author and main developer of the library.
 * [Santiago Arteaga][phillipus85-url] is a contributor and repository administrator. 
 * [Luis Florez][le99-url] is a contributor and developed examples and tutorials for the library.
-* [Lina Ojeda][lojedaa-url] es colaborador y desarrolló la última versión de la actividad.
+* [Lina Ojeda][lojedaa-url] is a collaborator and developed the latest version of the activity.
 
 [Back to top](#retos-template)
 

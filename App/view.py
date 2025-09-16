@@ -1,12 +1,15 @@
 import sys
+from App import logic as lg
+from tabulate import tabulate as tab
 
 
 def new_logic():
     """
         Se crea una instancia del controlador
     """
-    #TODO: Llamar la función de la lógica donde se crean las estructuras de datos
-    pass
+    control = lg.new_logic()
+
+    return control
 
 def print_menu():
     print("Bienvenido")
@@ -23,9 +26,30 @@ def load_data(control):
     """
     Carga los datos
     """
-    #TODO: Realizar la carga de datos
-    pass
+    return lg.load_data(control)
 
+def print_records(records, n):
+    
+    if n < 0:
+        records_imprimir = records[n:]       
+    else:
+        records_imprimir = records[:n]      
+    
+    filas = []
+    for record in records_imprimir:
+        filas.append([
+            record["date"],
+            record["dep_time"],
+            record["arr_time"],
+            f"{record['carrier']} - {record['name']}",
+            record["tailnum"],
+            f"[{record['origin']} - {record['dest']}]",
+            record["air_time"],
+            record["distance"]])
+
+    headers = ["Fecha", "Hora Real de Salida", "Hora Real de llegada", "Aerolínea", "ID Aeronave", "Aeropuerto Origen y Aeropuerto Destino", "Duración", "Distancia"]
+    
+    print(tab(filas, headers=headers, tablefmt="rounded_grid"))
 
 def print_data(control, id):
     """
@@ -97,6 +121,14 @@ def main():
         if int(inputs) == 0:
             print("Cargando información de los archivos ....\n")
             data = load_data(control)
+            if data:
+                records, cant, time = data
+                print(f"Tiempo de carga: {time}")
+                print(f"Total de vuelos cargados: {cant}")
+                print("Primeros 5 vuelos registrados:")
+                print_records(records, 5)
+                print("Últimos 5 vuelos registrados:")
+                print_records(records, -5)
         elif int(inputs) == 1:
             print_req_1(control)
 
