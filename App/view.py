@@ -47,7 +47,7 @@ def print_records(records, n):
             record["air_time"],
             record["distance"]])
 
-    headers = ["Fecha", "Hora Real de Salida", "Hora Real de llegada", "Aerolínea", "ID Aeronave", "Aeropuerto Origen y Aeropuerto Destino", "Duración", "Distancia"]
+    headers = ["Fecha", "Hora Real de Salida", "Hora Real de llegada", "Aerolínea", "ID Aeronave", "Aeropuerto Origen y Aeropuerto 12xDestino", "Duración", "Distancia"]
     
     print(tab(filas, headers=headers, tablefmt="rounded_grid"))
 
