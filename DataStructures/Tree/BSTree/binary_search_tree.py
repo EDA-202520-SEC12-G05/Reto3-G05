@@ -95,13 +95,13 @@ def key_set_tree(node, result):
     return result
 
 def value_set(bst):
-    return value_set_tree(bst["root"], sll.new_list())
+    return value_set_tree(bst["root"], al.new_list())
 
 def value_set_tree(node, result):
     if node is not None:
-        _inorder(node["left"], result)
-        sll.add_last(result, node["value"])
-        _inorder(node["right"], result)
+        value_set_tree(node["left"], result)
+        al.add_last(result, node["value"])
+        value_set_tree(node["right"], result)
     return result
 
 def get_min(bst):
@@ -258,12 +258,12 @@ def values_range(node, ki, kf, lst):
 
 #Recorridos
 def inorder(bst):
-    return _inorder(bst["root"], sll.new_list())
+    return _inorder(bst["root"], al.new_list())
 
 def _inorder(node, result):
     if node is not None:
         _inorder(node["left"], result)
-        sll.add_last(result, node["key"])
+        al.add_last(result, node["key"])
         _inorder(node["right"], result)
     return result
 
