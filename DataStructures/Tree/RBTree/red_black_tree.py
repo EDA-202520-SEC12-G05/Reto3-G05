@@ -1,7 +1,7 @@
 from DataStructures.Tree.RBTree import rbt_node as rn
 from DataStructures.Tree.BSTree import binary_search_tree as bs
 from DataStructures.Tree.RBTree import rbt_aux_functions as aux
-from DataStructures.List import single_linked_list as sll
+from DataStructures.List import array_list as sll
 
 def new_map():
     rbt = {"root": None,

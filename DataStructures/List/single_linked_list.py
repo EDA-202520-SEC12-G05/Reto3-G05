@@ -4,6 +4,7 @@ def new_list():
         "first": None, 
         "last": None,
         "size": 0,
+        "type": "SINGLE_LINKED"
     }
     return newlist
 
@@ -247,8 +248,8 @@ def exchange(my_list, pos_1, pos_2):
     node_actual = my_list["first"]
     i = 0
 
-    nodo1 = None   # 👈 Inicializar
-    nodo2 = None   # 👈 Inicializar
+    nodo1 = None   
+    nodo2 = None   
 
     # Recorrido completo
     while node_actual is not None:
@@ -256,7 +257,7 @@ def exchange(my_list, pos_1, pos_2):
             nodo1 = node_actual
         if i == pos_2:
             nodo2 = node_actual
-        if nodo1 is not None and nodo2 is not None:   # 👈 Condición segura
+        if nodo1 is not None and nodo2 is not None:   
             break
         
         node_actual = node_actual["next"]

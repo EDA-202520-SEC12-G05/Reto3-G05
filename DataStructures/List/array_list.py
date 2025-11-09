@@ -3,6 +3,7 @@ def new_list():
     newlist = {
         "elements": [],
         "size": 0,
+        "type": "ARRAY_LIST"
     }
     return newlist
 
