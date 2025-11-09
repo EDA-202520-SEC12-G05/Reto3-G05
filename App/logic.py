@@ -16,7 +16,7 @@ def new_logic():
     """
     Crea el catalogo para almacenar las estructuras de datos
     """
-    catalog = {"flights": lt.new_list()}
+    catalog = lt.new_list()
     
     return catalog
 
@@ -29,9 +29,9 @@ def load_data(catalog):
     """
     ti = get_time()
 
-    barrios_file = os.path.join(data_dir, "flights_large.csv")
+    data_file = os.path.join(data_dir, "flights_large.csv")
     file = csv.DictReader(
-            open(barrios_file, encoding = "utf-8"), delimiter =",")
+            open(data_file, encoding = "utf-8"), delimiter =",")
     
     for record in file:
 
@@ -39,19 +39,19 @@ def load_data(catalog):
         record["date"] = dt.strptime(record["date"], '%Y-%m-%d').date()
         record["dep_time"] = dt.strptime(record["dep_time"], "%H:%M").time()
         record["date_hour"] = dt.combine(record["date"], record["dep_time"])
-        record["sched_dep_time"] = dt.strptime(record["sched_dep_time"], "%H:%M")
+        record["sched_dep_time"] = dt.strptime(record["sched_dep_time"], "%H:%M").time()
         record["arr_time"] = dt.strptime(record["arr_time"], "%H:%M").time()
-        record["sched_arr_time"] = dt.strptime(record["sched_arr_time"], "%H:%M")
+        record["sched_arr_time"] = dt.strptime(record["sched_arr_time"], "%H:%M").time()
         record["num_flight"] = int(record["flight"])
         record["airtime"] = float(record["air_time"])
         record["distance"] = float(record["distance"])
 
-        lt.add_last(catalog["flights"], record)
+        lt.add_last(catalog, record)
 
-    lt.quick_sort(catalog["flights"], cmp_f)
+    lt.quick_sort(catalog, cmp_f)
     tf = get_time()
     
-    return catalog["flights"]["elements"], catalog["flights"]["size"], round(delta_time(ti, tf), 4)
+    return catalog["elements"], catalog["size"], round(delta_time(ti, tf), 4)
 
 # Funciones de consulta sobre el catálogo
 
@@ -61,14 +61,6 @@ def req_1(catalog):
     Retorna el resultado del requerimiento 1
     """
     # TODO: Modificar el requerimiento 1
-    pass
-
-
-def req_2(catalog):
-    """
-    Retorna el resultado del requerimiento 2
-    """
-    # TODO: Modificar el requerimiento 2
     pass
 
 
@@ -122,4 +114,6 @@ def delta_time(start, end):
 #Auxiliares
 def cmp_f(reg1, reg2):
     return reg1["date_hour"] < reg2["date_hour"]
+
+
 

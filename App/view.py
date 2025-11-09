@@ -47,7 +47,7 @@ def print_records(records, n):
             record["air_time"],
             record["distance"]])
 
-    headers = ["Fecha", "Hora Real de Salida", "Hora Real de llegada", "Aerolínea", "ID Aeronave", "Aeropuerto Origen y Aeropuerto 12xDestino", "Duración", "Distancia"]
+    headers = ["Fecha", "Hora Real de Salida", "Hora Real de llegada", "Aerolínea", "ID Aeronave", "Aeropuerto Origen y Aeropuerto Destino", "Duración (min)", "Distancia (mi)"]
     
     print(tab(filas, headers=headers, tablefmt="rounded_grid"))
 
@@ -63,14 +63,6 @@ def print_req_1(control):
         Función que imprime la solución del Requerimiento 1 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 1
-    pass
-
-
-def print_req_2(control):
-    """
-        Función que imprime la solución del Requerimiento 2 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 2
     pass
 
 
@@ -131,9 +123,6 @@ def main():
                 print_records(records, -5)
         elif int(inputs) == 1:
             print_req_1(control)
-
-        elif int(inputs) == 2:
-            print_req_2(control)
 
         elif int(inputs) == 3:
             print_req_3(control)
