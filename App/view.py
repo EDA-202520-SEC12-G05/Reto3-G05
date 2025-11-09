@@ -38,6 +38,7 @@ def print_records(records, n):
     filas = []
     for record in records_imprimir:
         filas.append([
+            record["id"],
             record["date"],
             record["dep_time"],
             record["arr_time"],
@@ -47,9 +48,42 @@ def print_records(records, n):
             record["air_time"],
             record["distance"]])
 
-    headers = ["Fecha", "Hora Real de Salida", "Hora Real de llegada", "Aerolínea", "ID Aeronave", "Aeropuerto Origen y Aeropuerto Destino", "Duración (min)", "Distancia (mi)"]
+    headers = ["ID", "Fecha", "Hora Real de Salida", "Hora Real de llegada", "Aerolínea", "ID Aeronave", "Aeropuerto Origen y Aeropuerto Destino", "Duración (min)", "Distancia (mi)"]
     
     print(tab(filas, headers=headers, tablefmt="rounded_grid"))
+
+#Función general y adaptada para imprimir lo q se necesite
+def print_table(records, n, headers=None, columnas=None, ver = False):
+
+    """Recibe una lista de strings en columnas, 
+       que incluye los nombres de las llaves que interesa mostrar.
+       Itera sobre la lista y busca directamente en los records la 
+       llave que se necesita y lo mete a la lista de filas a mostrar.
+
+       Y ya pq en cada requerimiento piden una baina distinta Dios
+    """
+    if n < 0:
+        records_imprimir = records[n:]       
+    else:
+        records_imprimir = records[:n]   
+
+    #Opción para imprimir en vertical
+    if ver:
+        filas = []
+        for record in records:
+            filas.extend(list(record.items()))
+            filas.append(("", ""))  # separador visual opcional
+
+        print(tab(filas, tablefmt="fancy_grid"))
+
+    else:
+        filas = []
+        for record in records_imprimir:
+            fila = []
+            for col in columnas:
+                fila.append(record[col])
+            filas.append(fila)
+        print(tab(filas, headers=headers, tablefmt="rounded_grid"))
 
 def print_data(control, id):
     """
@@ -58,12 +92,30 @@ def print_data(control, id):
     #TODO: Realizar la función para imprimir un elemento
     pass
 
-def print_req_1(control):
-    """
-        Función que imprime la solución del Requerimiento 1 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 1
-    pass
+def print_req_1(control, codigo, rango):
+
+    resultado = lg.req_1(control, codigo, rango)
+
+    if resultado:
+        tiempo, cant, records = resultado
+        print(f"\tTiempo total de ejecución: {tiempo}")
+        print(f"\tNúmero total de vuelos que cumplen con los filtros: {cant}")
+
+        #Setup de headers y columnas para print_table
+        headers = ["ID", "Código", "Fecha", "Nombre de Aerolínea", "Código de Aerolínea", "Aeropuerto Origen", "Aeropuerto Destino", "Minutos de Retraso"]
+        columnas = ["id", "flight", "date", "name", "carrier", "origin", "dest", "delay"]
+
+        #Verificación de tamaño de muestra
+        if cant > 10:
+            print("\nPrimeros 5 registros encontrados: ")
+            print_table(records, 5, headers, columnas)
+            print("\nÚltimos 5 registros encontrados: ")
+            print_table(records, -5, headers, columnas)
+        else:
+            print_table(records, cant, headers, columnas)
+    else:
+        print("\nNo se hallaron registros que coincidieran con la búsqueda.")
+        print("\n")
 
 
 def print_req_3(control):
@@ -82,7 +134,7 @@ def print_req_4(control):
     pass
 
 
-def print_req_5(control):
+def print_req_6(control):
     """
         Función que imprime la solución del Requerimiento 5 en consola
     """
@@ -90,12 +142,25 @@ def print_req_5(control):
     pass
 
 
-def print_req_6(control):
-    """
-        Función que imprime la solución del Requerimiento 6 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 6
-    pass
+def print_req_5(control, rango_f, cod, n):
+
+    resultado = lg.req_5(control, rango_f, cod, n)
+
+    if resultado:
+        tiempo, cant, records = resultado
+        print(f"\tTiempo total de ejecución: {tiempo}")
+        print(f"\tNúmero total de aerolíneas consideradas: {cant}")
+
+        #FORMATEO PARA IMPRIMIR VUELOM
+        for aerolin in records:
+            aerolin["Vuelo de mayor distancia"] = tab(aerolin["Vuelo de mayor distancia"].items(), tablefmt="simple_grid")
+        
+
+        print_table(records, cant, ver=True)
+
+    else:
+        print("\nNo se hallaron registros que coincidieran con la búsqueda.")
+        print("\n")
 
 # Se crea la lógica asociado a la vista
 control = new_logic()
@@ -122,7 +187,9 @@ def main():
                 print("Últimos 5 vuelos registrados:")
                 print_records(records, -5)
         elif int(inputs) == 1:
-            print_req_1(control)
+            codigo = input("Ingrese el código de la aerolínea buscada: ")
+            rango = input("Ingrese el rango de minutos de retraso en salida a filtrar (formato [inicio, final]): ")
+            print_req_1(control, codigo, rango)
 
         elif int(inputs) == 3:
             print_req_3(control)
@@ -131,9 +198,12 @@ def main():
             print_req_4(control)
 
         elif int(inputs) == 5:
-            print_req_5(control)
+            rango = input("Ingrese el rango de fechas de salida a filtrar (formato [inicio, final]): ")
+            codigo = input("Ingrese el código del aeropuerto destino buscado: ")
+            n = input("Ingrese la cantidad N de aerolíneas a considerar: ")
+            print_req_5(control, rango, codigo, n)
 
-        elif int(inputs) == 5:
+        elif int(inputs) == 6:
             print_req_6(control)
 
         elif int(inputs) == 7:

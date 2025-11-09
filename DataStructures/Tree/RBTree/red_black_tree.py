@@ -130,7 +130,7 @@ def value_set(bst):
 def value_set_tree(node, result):
     if node is not None:
         bs._inorder(node["left"], result)
-        bs.sll.add_last(result, node["value"])
+        sll.add_last(result, node["value"])
         bs._inorder(node["right"], result)
     return result
 
