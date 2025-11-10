@@ -1,12 +1,15 @@
 import sys
+from App import logic as lg
+from tabulate import tabulate as tab
 
 
 def new_logic():
     """
         Se crea una instancia del controlador
     """
-    #TODO: Llamar la función de la lógica donde se crean las estructuras de datos
-    pass
+    control = lg.new_logic()
+
+    return control
 
 def print_menu():
     print("Bienvenido")
@@ -23,9 +26,54 @@ def load_data(control):
     """
     Carga los datos
     """
-    #TODO: Realizar la carga de datos
-    pass
+    return lg.load_data(control)
 
+def print_records(records, n):
+    
+    if n < 0:
+        records_imprimir = records[n:]       
+    else:
+        records_imprimir = records[:n]      
+    
+    filas = []
+    for record in records_imprimir:
+        filas.append([
+            record["id"],
+            record["date"],
+            record["dep_time"],
+            record["arr_time"],
+            f"{record['carrier']} - {record['name']}",
+            record["tailnum"],
+            f"[{record['origin']} - {record['dest']}]",
+            record["air_time"],
+            record["distance"]])
+
+    headers = ["ID", "Fecha", "Hora Real de Salida", "Hora Real de llegada", "Aerolínea", "ID Aeronave", "Aeropuerto Origen y Aeropuerto Destino", "Duración (min)", "Distancia (mi)"]
+    
+    print(tab(filas, headers=headers, tablefmt="rounded_grid"))
+
+#Función general y adaptada para imprimir lo q se necesite
+def print_table(records, headers, columnas, n):
+
+    """Recibe una lista de strings en columnas, 
+       que incluye los nombres de las llaves que interesa mostrar.
+       Itera sobre la lista y busca directamente en los records la 
+       llave que se necesita y lo mete a la lista de filas a mostrar.
+
+       Y ya pq en cada requerimiento piden una baina distinta Dios
+    """
+    if n < 0:
+        records_imprimir = records[n:]       
+    else:
+        records_imprimir = records[:n]   
+
+    filas = []
+    for record in records_imprimir:
+        fila = []
+        for col in columnas:
+            fila.append(record[col])
+        filas.append(fila)
+    print(tab(filas, headers=headers, tablefmt="rounded_grid"))
 
 def print_data(control, id):
     """
@@ -34,20 +82,30 @@ def print_data(control, id):
     #TODO: Realizar la función para imprimir un elemento
     pass
 
-def print_req_1(control):
-    """
-        Función que imprime la solución del Requerimiento 1 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 1
-    pass
+def print_req_1(control, codigo, rango):
 
+    resultado = lg.req_1(control, codigo, rango)
 
-def print_req_2(control):
-    """
-        Función que imprime la solución del Requerimiento 2 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 2
-    pass
+    if resultado:
+        tiempo, cant, records = resultado
+        print(f"\tTiempo total de ejecución: {tiempo}")
+        print(f"\tNúmero total de vuelos que cumplen con los filtros: {cant}")
+
+        #Setup de headers y columnas para print_table
+        headers = ["ID", "Código", "Fecha", "Nombre de Aerolínea", "Código de Aerolínea", "Aeropuerto Origen", "Aeropuerto Destino", "Minutos de Retraso"]
+        columnas = ["id", "flight", "date", "name", "carrier", "origin", "dest", "delay"]
+
+        #Verificación de tamaño de muestra
+        if cant > 10:
+            print("\nPrimeros 5 registros encontrados: ")
+            print_table(records, headers, columnas, 5)
+            print("\nÚltimos 5 registros encontrados: ")
+            print_table(records, headers, columnas, -5)
+        else:
+            print_table(records, headers, columnas, cant)
+    else:
+        print("\nNo se hallaron registros que coincidieran con la búsqueda.")
+        print("\n")
 
 
 def print_req_3(control):
@@ -97,11 +155,18 @@ def main():
         if int(inputs) == 0:
             print("Cargando información de los archivos ....\n")
             data = load_data(control)
+            if data:
+                records, cant, time = data
+                print(f"Tiempo de carga: {time}")
+                print(f"Total de vuelos cargados: {cant}")
+                print("Primeros 5 vuelos registrados:")
+                print_records(records, 5)
+                print("Últimos 5 vuelos registrados:")
+                print_records(records, -5)
         elif int(inputs) == 1:
-            print_req_1(control)
-
-        elif int(inputs) == 2:
-            print_req_2(control)
+            codigo = input("Ingrese el código de la aerolínea buscada: ")
+            rango = input("Ingrese el rango de minutos de retraso en salida a filtrar (formato [inicio, final]): ")
+            print_req_1(control, codigo, rango)
 
         elif int(inputs) == 3:
             print_req_3(control)
