@@ -13,6 +13,7 @@ data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/Challenge-3'
 
 from DataStructures.List import array_list as lt
 from DataStructures.Tree.BSTree import binary_search_tree as bst
+from DataStructures.Priority_queue import priority_queue as hp
 
 def new_logic():
     """
