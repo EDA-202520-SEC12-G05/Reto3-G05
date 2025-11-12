@@ -4,6 +4,7 @@ import sys
 import os
 from datetime import datetime as dt
 from datetime import timedelta as td
+from datetime import timedelta as td
 
 csv.field_size_limit(2147483647)
 default_limit = 1000
@@ -12,6 +13,7 @@ sys.setrecursionlimit(default_limit*10)
 data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/Challenge-3'
 
 from DataStructures.List import array_list as lt
+from DataStructures.Tree.BSTree import binary_search_tree as bst
 from DataStructures.Tree.BSTree import binary_search_tree as bst
 
 def new_logic():
@@ -39,14 +41,16 @@ def load_data(catalog):
         record["id"] = int(record["id"])
         record["date"] = dt.strptime(record["date"], '%Y-%m-%d').date()
         record["dep_time"] = dt.strptime(record["dep_time"], "%H:%M").time()
-        record["date_hour"] = dt.combine(record["date"], record["dep_time"])
+        record["date_hour_dep"] = dt.combine(record["date"], record["dep_time"])
         record["sched_dep_time"] = dt.strptime(record["sched_dep_time"], "%H:%M").time()
         record["arr_time"] = dt.strptime(record["arr_time"], "%H:%M").time()
+        record["date_hour_arr"] = dt.combine(record["date"], record["arr_time"])
         record["sched_arr_time"] = dt.strptime(record["sched_arr_time"], "%H:%M").time()
+        record["delay"] = min_dif(record["date"], record["arr_time"], record["sched_arr_time"])
         record["num_flight"] = int(record["flight"])
         record["airtime"] = float(record["air_time"])
         record["distance"] = float(record["distance"])
-
+        
         lt.add_last(catalog["flights"], record)
 
     lt.quick_sort(catalog["flights"], cmp_f_loadata)
@@ -75,8 +79,8 @@ def req_1(catalog, cod_aerolinea, rango_min):
             #3. Validar si es retraso (if dif > 0) y si está dentro del rango
             if dif_min > 0 and rango_min[0] <= dif_min <= rango_min[1]:
                 vuelo["delay"] = dif_min
-                #5. Añadir al bst con la llave siendo tupla (delay, date_hour) para que se encargue de organizarlos él solito
-                llave = (vuelo["delay"], vuelo["date_hour"])
+                #5. Añadir al bst con la llave siendo tupla (delay, date_hour_dep) para que se encargue de organizarlos él solito
+                llave = (vuelo["delay"], vuelo["date_hour_dep"])
                 bst.put(arbol, llave, vuelo)
 
     #6. Sacar los values en una array list y mandar para el view
@@ -103,19 +107,75 @@ def req_4(catalog):
     pass
 
 
-def req_5(catalog):
+def req_6(catalog):
     """
     Retorna el resultado del requerimiento 5
     """
     # TODO: Modificar el requerimiento 5
     pass
 
-def req_6(catalog):
-    """
-    Retorna el resultado del requerimiento 6
-    """
-    # TODO: Modificar el requerimiento 6
-    pass
+def req_5(catalog, rango_f, cod, n):
+
+    ti = get_time()
+
+    #1. Formatear
+    rango_f = format_rango(rango_f, "f")
+    n = int(n)
+    vuelos = catalog["flights"] #Array_list!!!
+    aerolineas = {}
+    arbol = bst.new_map()
+    #2. Aplicar filtros
+    for vuelo in vuelos["elements"]:#O(n)
+        if rango_f[0] <= vuelo["date"] <= rango_f[1] and vuelo["dest"] == cod:
+        #4. Añadir al dict de aerolineas (normal)
+            car = vuelo["carrier"]
+            if car not in aerolineas:
+                #4.1. Llevar cuenta de: Puntualidad, vuelos, distancia, duración, y elegir el vuelo de mayor distancia
+                aerolineas[car] = {"Aerolínea": (f"{vuelo['carrier']} - {vuelo['name']}"), 
+                                         "Puntualidad": vuelo['delay'],
+                                         "Cantidad de vuelos": 1,
+                                         "Duración Promedio": vuelo['airtime'],
+                                         "Distancia Promedio": vuelo['distance'],
+                                         "Vuelo de mayor distancia": vuelo}
+            else:
+                aerolineas[car]['Puntualidad'] += vuelo["delay"]
+                aerolineas[car]['Cantidad de vuelos'] += 1
+                aerolineas[car]['Duración Promedio'] += vuelo["airtime"]
+                aerolineas[car]['Distancia Promedio'] += vuelo['distance']
+
+                if vuelo['distance'] > aerolineas[car]["Vuelo de mayor distancia"]['distance']:
+                    aerolineas[car]['Vuelo de mayor distancia'] = vuelo
+
+    #Por si ninguna paso el filtro
+    if not aerolineas:
+        return None
+
+    #5. Promedios y etc
+    for aer in aerolineas.keys(): #O(a)
+        aerolinea = aerolineas[aer]
+        if aerolinea and aerolinea["Cantidad de vuelos"] > 0:
+            aerolinea["Puntualidad"] = aerolinea["Puntualidad"]/aerolinea["Cantidad de vuelos"]
+            aerolinea["Duración Promedio"] = aerolinea["Duración Promedio"]/aerolinea["Cantidad de vuelos"]
+            aerolinea["Distancia Promedio"] = aerolinea["Distancia Promedio"]/aerolinea["Cantidad de vuelos"]
+            #Solo campos importantes para vmayor
+            vuelom = aerolinea["Vuelo de mayor distancia"]
+            if vuelom:
+                aerolinea["Vuelo de mayor distancia"] = {"ID": vuelom['id'],
+                                        "Codigo": vuelom['flight'],
+                                        "Fecha de llegada": vuelom['date_hour_arr'],
+                                        "Aeropuertos Origen y Destino": (vuelom['origin'], vuelom['dest']),
+                                        "Duracion": vuelom['airtime']}
+                #6. Meter al arbol con tupla (puntualidad, cod)
+                key = (abs(aerolinea["Puntualidad"]), aer)
+                arbol = bst.put(arbol, key, aerolinea)
+
+    #7. Sacar value set
+    values = bst.value_set(arbol) #Values -> Array_list!!!!
+    #8. Sublist hasta N
+    values = lt.sub_list(values, 0, n)
+    #9. Retornar
+    tf = get_time()
+    return round(delta_time(ti, tf), 4), values["size"], values["elements"]
 
 
 # Funciones para medir tiempos de ejecucion
@@ -136,7 +196,7 @@ def delta_time(start, end):
 
 #Auxiliares
 def cmp_f_loadata(reg1, reg2):
-    return reg1["date_hour"] < reg2["date_hour"]
+    return reg1["date_hour_dep"] < reg2["date_hour_dep"]
 
 def min_dif(fecha, hreal, hsch):
 
@@ -148,12 +208,13 @@ def min_dif(fecha, hreal, hsch):
 
     return (h_real - h_sch).total_seconds() / 60
 
-def format_rango(rango):
-    #Convierte rangos en strings en formato "[num1, num2]" a tupla para req 1
+def format_rango(rango, tipo="n"):
+    #Convierte rangos en strings en formato "[num1, num2]" o "[fecha1, fecha2]" a tupla 
 
     rango = rango.strip("[]").replace(" ", "")   # quita corchetes (y espacios por si acaso)
     l_rango = rango.split(",") 
-
+    #Si necesita formatear fecha
+    if tipo == "f":
+        return (dt.strptime(l_rango[0], '%Y-%m-%d').date(), dt.strptime(l_rango[1], '%Y-%m-%d').date()) 
+    #Por default viene para formatear números
     return (int(l_rango[0]), int(l_rango[1]))
-
-
