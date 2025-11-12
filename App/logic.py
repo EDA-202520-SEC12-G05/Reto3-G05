@@ -256,14 +256,15 @@ def cmp_f_loadata(reg1, reg2):
     return reg1["date_hour_dep"] < reg2["date_hour_dep"]
 
 def min_dif(fecha, hreal, hsch):
-
     h_real = dt.combine(fecha, hreal)
     h_sch = dt.combine(fecha, hsch)
+    dif = (h_real - h_sch).total_seconds() / 60
 
-    if h_real < h_sch: #Pasó medianoche
-        h_real += td(days=1) #Ajuste de 1 día para comparar bien
+    # Si la diferencia es muy grande en negativo, probablemente pasó medianoche
+    if dif < -720:  # -12 horas, margen de seguridad
+        dif += 1440  # sumar un día
 
-    return (h_real - h_sch).total_seconds() / 60
+    return dif
 
 def format_rango(rango, tipo="n"):
     #Convierte rangos en strings en formato "[num1, num2]" o "[fecha1, fecha2]" a tupla 
@@ -273,5 +274,8 @@ def format_rango(rango, tipo="n"):
     #Si necesita formatear fecha
     if tipo == "f":
         return (dt.strptime(l_rango[0], '%Y-%m-%d').date(), dt.strptime(l_rango[1], '%Y-%m-%d').date()) 
+    #Si formatea hora
+    if tipo == "h":
+        return (dt.strptime(l_rango[0], "%H:%M").time(), dt.strptime(l_rango[1], "%H:%M").time())
     #Por default viene para formatear números
     return (int(l_rango[0]), int(l_rango[1]))

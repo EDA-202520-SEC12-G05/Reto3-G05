@@ -49,9 +49,8 @@ def print_records(records, n):
             record["air_time"],
             record["distance"]])
 
-    headers = ["ID", "Fecha", "Hora Real de Salida", "Hora Real de llegada", "Aerolínea", "ID Aeronave", "Aeropuerto Origen y Aeropuerto Destino", "Duración (min)", "Distancia (mi)"]
-    headers = ["ID", "Fecha", "Hora Real de Salida", "Hora Real de llegada", "Aerolínea", "ID Aeronave", "Aeropuerto Origen y Aeropuerto Destino", "Duración (min)", "Distancia (mi)"]
-    
+    headers = ["ID", "Fecha", "Hora Real de Salida", "Hora Real de llegada", "Aerolínea", "ID Aeronave", "Aeropuerto Origen y Destino", "Duración (min)", "Distancia (mi)"]
+
     print(tab(filas, headers=headers, tablefmt="rounded_grid"))
 
 #Función general y adaptada para imprimir lo q se necesite
@@ -74,7 +73,7 @@ def print_table(records, n, headers=None, columnas=None, ver = False):
         filas = []
         for record in records:
             filas.extend(list(record.items()))
-            filas.append(("", ""))  # separador visual opcional
+            filas.append(("", ""))  # separador visual
 
         print(tab(filas, tablefmt="fancy_grid"))
 
@@ -136,11 +135,11 @@ def print_req_3(control, cod_al, cod_ap, rango_d):
         #Verificación de tamaño de muestra
         if cant > 10:
             print("\nPrimeros 5 registros encontrados: ")
-            print_table(records, headers, columnas, 5)
+            print_table(records, 5, headers, columnas)
             print("\nÚltimos 5 registros encontrados: ")
-            print_table(records, headers, columnas, -5)
+            print_table(records, -5, headers, columnas)
         else:
-            print_table(records, headers, columnas, cant)
+            print_table(records, cant, headers, columnas)
     else:
         print("\nNo se hallaron registros que coincidieran con la búsqueda.")
         print("\n")
