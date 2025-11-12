@@ -111,13 +111,58 @@ def req_3(catalog, cod_al, cod_ap, rango_d):
     return round(delta_time(ti, tf),4), resultado["size"], resultado["elements"]
 
 
-def req_4(catalog):
-    """
-    Retorna el resultado del requerimiento 4
-    """
-    # TODO: Modificar el requerimiento 4
-    pass
+def req_4(catalog, r_fechas, f_horaria, cant_n):
+    
+    ti = get_time()
+    n = int(n)
+    vuelos = catalog["flights"]["elements"]
+    r_fechas = format_rango(r_fechas, "f")
+    f_horaria = format_rango(f_horaria, "h")
+    heap = hp.new_map(False)
 
+    for vuelo in vuelos:
+        if r_fechas[0]<= vuelo["date"] <= r_fechas[1]:
+            if f_horaria[0] <= vuelo["dep_time"] <= f_horaria[1]:
+
+                aerolineas = {
+                    vuelo["carrier"]: {"num_vuelos": 0,
+                                       "duracion": 0,
+                                       "distancia": 0,
+                                       "vuelo_min_d": vuelo,
+                                       "codigo": vuelo["carrier"]}
+                }
+
+                #Si la aerolinea no está en el diccionario
+                if vuelo["carrier"] not in aerolineas:
+                    aerolineas[vuelo["carrier"]] = {"num_vuelos": 1,
+                                                    "duracion": vuelo["airtime"],
+                                                    "distancia": vuelo["distance"],
+                                                    "vuelo_min_d": vuelo,
+                                                    "codigo": vuelo["carrier"]}
+                #Si la aerolinea ya existe en el diccionario
+                if vuelo["carrier"] in aerolineas:
+                    aerolineas[vuelo["carrier"]]["num_vuelos" ]+= 1
+                    aerolineas[vuelo["carrier"]]["duracion"] += vuelo["airtime"]
+                    aerolineas[vuelo["carrier"]]["distancia"] += vuelo["distance"]
+                    if vuelo["airtime"] < aerolineas[vuelo["carrier"]["vuelo_min_d"]]:
+                        aerolineas[vuelo["carrier"]]["vuelo_min_d"] = vuelo
+
+    for codigo in aerolineas.values():
+        codigo["duracion"] = codigo["duracion"]/codigo["num_vuelos"]
+        codigo["distancia"] = codigo["distance"]/codigo["num_vuelos"]
+        #Insertar en heap para ordenar de forma descendente
+        heap = hp.insert(heap, codigo["num_vuelos"], codigo)
+
+    lista = []
+    i = 0
+
+    while not i == n:
+        elem = hp.remove(heap)
+        lista.append(elem)
+        i += 1
+    tf = get_time()
+    
+    return lista, delta_time(ti,tf)
 
 def req_6(catalog):
     """
