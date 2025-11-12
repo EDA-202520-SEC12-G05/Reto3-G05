@@ -43,13 +43,12 @@ def is_empty(heap):
     return heap["size"] == 0
 
 def swim(heap, pos):
-    array_l = heap["elements"]["elements"]
-    cmp = heap["cmp_function"]
+    array_l = heap["elements"]
 
     while pos > 1:
         parent = pos // 2
 
-        if cmp(array_l[parent], array_l[pos]):
+        if priority(heap, lt.get_element(array_l, parent), lt.get_element(array_l, pos)):
             break
         else:
             exchange(heap, parent, pos)
@@ -118,7 +117,7 @@ def sink(heap, pos):
         h_der = 2 * pos + 1
         hijo_p = h_iz
 
-        if h_der <= n and priority(heap, lt.get_element(array_l, h_iz), lt.get_element(array_l, h_der)):
+        if h_der <= n and priority(heap, lt.get_element(array_l, h_der), lt.get_element(array_l, h_iz)):
             hijo_p = h_der
 
         if not priority(heap, lt.get_element(array_l, pos), lt.get_element(array_l, hijo_p)):
@@ -138,6 +137,7 @@ def remove(heap):
         lt.delete_element(array_l, heap["size"])
         heap["size"] -= 1
 
+        # Restaura el heap solo si quedan elementos
         if heap["size"] > 0:
             sink(heap, 1)
 
