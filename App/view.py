@@ -120,12 +120,33 @@ def print_req_1(control, codigo, rango):
         print("\n")
 
 
-def print_req_3(control):
-    """
-        Función que imprime la solución del Requerimiento 3 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 3
-    pass
+def print_req_3(control, cod_al, cod_ap, rango_d):
+
+    resultado = lg.req_3(control, cod_al, cod_ap, rango_d)
+
+    if resultado:
+        tiempo, cant, records = resultado
+        print(f"\tTiempo total de ejecución: {tiempo}")
+        print(f"\tNúmero total de vuelos que cumplen con los filtros: {cant}")
+
+        #Setup de headers y columnas para print_table
+        headers = ["ID", "Código", "Fecha y hora de llegada", "Nombre de aerolínea", "Código de aerolínea", "Aeropuerto Orígen", "Aeropuerto Destino", "Distancia Total"]
+        columnas = ["id", "flight", "date_hour_arr", "name", "carrier", "origin", "dest", "distance"]
+
+        #Verificación de tamaño de muestra
+        if cant > 10:
+            print("\nPrimeros 5 registros encontrados: ")
+            print_table(records, headers, columnas, 5)
+            print("\nÚltimos 5 registros encontrados: ")
+            print_table(records, headers, columnas, -5)
+        else:
+            print_table(records, headers, columnas, cant)
+    else:
+        print("\nNo se hallaron registros que coincidieran con la búsqueda.")
+        print("\n")
+
+
+   
 
 
 def print_req_4(control):
@@ -194,7 +215,10 @@ def main():
             print_req_1(control, codigo, rango)
 
         elif int(inputs) == 3:
-            print_req_3(control)
+            cod_al = input("Ingrese el códig de la aerolínea buscada: ")
+            cod_ap = input("Ingrese el código de aeropuerto buscado: ")
+            rango_d = input("Ingrese el rango de distancia a filtrar (formato [inicio, final]): ")
+            print_req_3(control, cod_al, cod_ap, rango_d)
 
         elif int(inputs) == 4:
             print_req_4(control)

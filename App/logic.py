@@ -89,12 +89,26 @@ def req_1(catalog, cod_aerolinea, rango_min):
     return round(delta_time(ti, tf),4), resultado["size"], resultado["elements"]
 
 
-def req_3(catalog):
-    """
-    Retorna el resultado del requerimiento 3
-    """
-    # TODO: Modificar el requerimiento 3
-    pass
+def req_3(catalog, cod_al, cod_ap, rango_d):
+    
+    ti = get_time()
+    l_vuelos = catalog["flights"]["elements"]
+    rango_d = format_rango(rango_d)
+    arbol = bst.new_map()
+
+    for vuelo in l_vuelos:
+
+        #Filtrar por aerolinea y aeropuero destino
+        if vuelo["carrier"] == cod_al and vuelo["dest"] == cod_ap:
+            #Filtrar por rango de distancia
+            if  rango_d[0] <= vuelo["distance"] <= rango_d[1]:             
+                    #Insertar al árbol según distancia o fecha y hora de llegada
+                    llave = (vuelo["distance"], vuelo["date_hour_arr"])
+                    bst.put(arbol, llave, vuelo)
+    resultado = bst.value_set(arbol)
+    tf = get_time()
+
+    return round(delta_time(ti, tf),4), resultado["size"], resultado["elements"]
 
 
 def req_4(catalog):
