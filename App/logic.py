@@ -14,8 +14,9 @@ sys.setrecursionlimit(default_limit*10)
 data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/Challenge-3'
 
 from DataStructures.List import array_list as lt
-from DataStructures.Tree.BSTree import binary_search_tree as bst
 from DataStructures.Tree.RBTree import red_black_tree as rbt
+from DataStructures.Tree.BSTree import binary_search_tree as bst
+from DataStructures.Priority_queue import priority_queue as hp
 
 def new_logic():
     """
@@ -59,6 +60,16 @@ def load_data(catalog):
     return catalog["flights"]["elements"], catalog["flights"]["size"], round(delta_time(ti, tf), 4)
 
 # Funciones de consulta sobre el catálogo
+
+def data_id(control, id_):
+    lista = control["flights"]
+
+    for i in range(0, lista["size"]):
+        vuelo = lt.get_element(lista, i)
+        if vuelo["id"] == int(id_):
+            return vuelo
+    
+    return None
 
 
 def req_1(catalog, cod_aerolinea, rango_min):
@@ -117,13 +128,64 @@ def req_3(catalog, cod_al, cod_ap, rango_d):
     return round(delta_time(ti, tf),4), resultado["size"], resultado["elements"]
 
 
-def req_4(catalog):
-    """
-    Retorna el resultado del requerimiento 4
-    """
-    # TODO: Modificar el requerimiento 4
-    pass
+def req_4(catalog, r_fechas, f_horaria, n):
+    
+    ti = get_time()
+    n = int(n)
+    vuelos = catalog["flights"]["elements"]
+    r_fechas = format_rango(r_fechas, "f")
+    f_horaria = format_rango(f_horaria, "h")
+    heap = hp.new_heap(False)
+    aerolineas = {}
 
+    for vuelo in vuelos:
+        if r_fechas[0]<= vuelo["date"] <= r_fechas[1]:
+            if f_horaria[0] <= vuelo["dep_time"] <= f_horaria[1]:
+
+                #Si la aerolinea no está en el diccionario
+                if vuelo["carrier"] not in aerolineas:
+                    aerolineas[vuelo["carrier"]] = {"Aerolínea": (f"{vuelo['carrier']} - {vuelo['name']}"),
+                                                    "num_vuelos": 1,
+                                                    "duracion": vuelo["airtime"],
+                                                    "distancia": vuelo["distance"],
+                                                    "vuelo_min_d": vuelo}
+                #Si la aerolinea ya existe en el diccionario
+                if vuelo["carrier"] in aerolineas:
+                    aerolineas[vuelo["carrier"]]["num_vuelos" ]+= 1
+                    aerolineas[vuelo["carrier"]]["duracion"] += vuelo["airtime"]
+                    aerolineas[vuelo["carrier"]]["distancia"] += vuelo["distance"]
+                    
+                    if aerolineas[vuelo["carrier"]]["vuelo_min_d"] is None:
+                        aerolineas[vuelo["carrier"]]["vuelo_min_d"] = vuelo
+                    else:
+                        d_vuelo = vuelo["airtime"]
+                        d_vm = aerolineas[vuelo["carrier"]]["vuelo_min_d"]["airtime"]
+                        if d_vuelo < d_vm:
+                            aerolineas[vuelo["carrier"]]["vuelo_min_d"] = vuelo
+
+    for codigo in aerolineas.values():
+        codigo["duracion"] = codigo["duracion"]/codigo["num_vuelos"]
+        codigo["distancia"] = codigo["distancia"]/codigo["num_vuelos"]
+        #Insertar en heap para ordenar de forma descendente
+        codigo["Vuelo de menor duración"] = {"ID": codigo["vuelo_min_d"]["id"], "Código": codigo["vuelo_min_d"]["flight"], 
+                                             "Fecha-Hora programada de salida": dt.combine(codigo["vuelo_min_d"]["date"], codigo["vuelo_min_d"]["sched_dep_time"]),
+                                             "Aeropuerto Origen": codigo["vuelo_min_d"]["origin"],
+                                             "Aeropuerto Destino": codigo["vuelo_min_d"]["dest"],
+                                             "Duración": codigo["vuelo_min_d"]["airtime"]}
+        codigo.pop("vuelo_min_d", None)
+
+        heap = hp.insert(heap, codigo["num_vuelos"], codigo)
+
+    lista = []
+    i = 0
+
+    while not i == n:
+        elem = hp.remove(heap)
+        lista.append(elem)
+        i += 1
+    tf = get_time()
+    
+    return delta_time(ti,tf), len(lista), lista
 
 def req_6(catalog, rf, rd, n):
 
@@ -179,10 +241,10 @@ def req_6(catalog, rf, rd, n):
             ae.pop("vuelo_mr", None)
 
         key = (abs(ae["Desviación Estandar"]), abs(ae["Puntualidad"]))
-        arbol = rbt.put(arbol, key, ae)
+        arbol = bst.put(arbol, key, ae)
 
     #7. Sacar value set
-    values = rbt.value_set(arbol) #Values -> Array_list!!!!
+    values = bst.value_set(arbol) #Values -> Array_list!!!!
     #8. Sublist hasta N
     values = lt.sub_list(values, 0, n)
     #9. Retornar
@@ -200,7 +262,7 @@ def req_5(catalog, rango_f, cod, n):
     n = int(n)
     vuelos = catalog["flights"] #Array_list!!!
     aerolineas = {}
-    arbol = rbt.new_map()
+    arbol = bst.new_map()
     #2. Aplicar filtros
     for vuelo in vuelos["elements"]:#O(n)
         if rango_f[0] <= vuelo["date"] <= rango_f[1] and vuelo["dest"] == cod:
@@ -244,10 +306,10 @@ def req_5(catalog, rango_f, cod, n):
                                         "Duracion": vuelom['airtime']}
                 #6. Meter al arbol con tupla (puntualidad, cod)
                 key = (abs(aerolinea["Puntualidad"]), aer)
-                arbol = rbt.put(arbol, key, aerolinea)
+                arbol = bst.put(arbol, key, aerolinea)
 
     #7. Sacar value set
-    values = rbt.value_set(arbol) #Values -> Array_list!!!!
+    values = bst.value_set(arbol) #Values -> Array_list!!!!
     #8. Sublist hasta N
     values = lt.sub_list(values, 0, n)
     #9. Retornar
