@@ -141,5 +141,5 @@ def remove(heap):
         if heap["size"] > 0:
             sink(heap, 1)
 
-        return min_elem
+        return min_elem["value"]
     return None

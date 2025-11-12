@@ -15,12 +15,12 @@ def print_menu():
     print("Bienvenido")
     print("0- Cargar información")
     print("1- Ejecutar Requerimiento 1")
-    print("2- Ejecutar Requerimiento 2")
     print("3- Ejecutar Requerimiento 3")
     print("4- Ejecutar Requerimiento 4")
     print("5- Ejecutar Requerimiento 5")
     print("6- Ejecutar Requerimiento 6")
-    print("7- Salir")
+    print("7 - Buscar elemento por ID")
+    print("8- Salir")
 
 def load_data(control):
     """
@@ -86,12 +86,16 @@ def print_table(records, n, headers=None, columnas=None, ver = False):
             filas.append(fila)
         print(tab(filas, headers=headers, tablefmt="rounded_grid"))
 
-def print_data(control, id):
+def print_data(control, id_):
     """
         Función que imprime un dato dado su ID
     """
-    #TODO: Realizar la función para imprimir un elemento
-    pass
+    reg = lg.data_id(control, id_)
+
+    if reg:
+        print_records([reg], 1)
+    else:
+        print("No se encontró ID coincidente con su búsqueda.")
 
 def print_req_1(control, codigo, rango):
 
@@ -144,18 +148,22 @@ def print_req_3(control, cod_al, cod_ap, rango_d):
         print("\nNo se hallaron registros que coincidieran con la búsqueda.")
         print("\n")
 
-
-   
-
-
-def print_req_4(control, r_fechas, f_horaria, n):
-    
-    resultado = lg.req_4(control, r_fechas, f_horaria, n)
+def print_req_4(control, rf, fh, n):
+    resultado = lg.req_4(control, rf, fh, n)
 
     if resultado:
-        lista, tiempo = resultado
-        print(f"\t")
+        tiempo, cant, records = resultado
+        print(f"\tTiempo total de ejecución: {tiempo}")
+        print(f"\tNúmero total de aerolíneas consideradas: {cant}")
 
+        for aerolin in records:
+            aerolin["Vuelo de menor duración"] = tab(aerolin["Vuelo de menor duración"].items(), tablefmt="simple_grid")
+        
+        print_table(records, cant, ver=True)
+
+    else:
+        print("\nNo se hallaron registros que coincidieran con la búsqueda.")
+        print("\n")
 
 def print_req_6(control, rf, rd, n):
 
@@ -221,6 +229,7 @@ def main():
                 print_records(records, 5)
                 print("Últimos 5 vuelos registrados:")
                 print_records(records, -5)
+
         elif int(inputs) == 1:
             codigo = input("Ingrese el código de la aerolínea buscada: ")
             rango = input("Ingrese el rango de minutos de retraso en salida a filtrar (formato [inicio, final]): ")
@@ -233,7 +242,10 @@ def main():
             print_req_3(control, cod_al, cod_ap, rango_d)
 
         elif int(inputs) == 4:
-            print_req_4(control)
+            rf = input("Ingrese el rango de fechas a filtrar (formato [inicio, final]): ")
+            fh = input("Ingrese la franja horaria a filtrar (formato [HH:MM, HH:MM]): ")
+            n = input("Ingrese la cantidad N de aerolíneas a considerar: ")
+            print_req_4(control, rf, fh, n)
 
         elif int(inputs) == 5:
             rango = input("Ingrese el rango de fechas a filtrar (formato [inicio, final]): ")
@@ -248,6 +260,10 @@ def main():
             print_req_6(control, rf, rd,n)
 
         elif int(inputs) == 7:
+            id_ = input("Ingrese el ID buscado: ")
+            print_data(control, id_)
+
+        elif int(inputs) == 8:
             working = False
             print("\nGracias por utilizar el programa") 
         else:

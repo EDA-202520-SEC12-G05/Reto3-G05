@@ -14,6 +14,7 @@ sys.setrecursionlimit(default_limit*10)
 data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/Challenge-3'
 
 from DataStructures.List import array_list as lt
+from DataStructures.Tree.RBTree import red_black_tree as rbt
 from DataStructures.Tree.BSTree import binary_search_tree as bst
 from DataStructures.Priority_queue import priority_queue as hp
 
@@ -60,6 +61,16 @@ def load_data(catalog):
 
 # Funciones de consulta sobre el catálogo
 
+def data_id(control, id_):
+    lista = control["flights"]
+
+    for i in range(0, lista["size"]):
+        vuelo = lt.get_element(lista, i)
+        if vuelo["id"] == int(id_):
+            return vuelo
+    
+    return None
+
 
 def req_1(catalog, cod_aerolinea, rango_min):
 
@@ -68,7 +79,7 @@ def req_1(catalog, cod_aerolinea, rango_min):
     l_vuelos = catalog["flights"]["elements"]
     rango_min = format_rango(rango_min)
 
-    arbol = bst.new_map()
+    arbol = rbt.new_map()
 
     #Recorrido a l_vuelos O(n)
     for vuelo in l_vuelos:
@@ -81,10 +92,10 @@ def req_1(catalog, cod_aerolinea, rango_min):
                 vuelo["delay"] = dif_min
                 #5. Añadir al bst con la llave siendo tupla (delay, date_hour_dep) para que se encargue de organizarlos él solito
                 llave = (vuelo["delay"], vuelo["date_hour_dep"])
-                bst.put(arbol, llave, vuelo)
+                rbt.put(arbol, llave, vuelo)
 
     #6. Sacar los values en una array list y mandar para el view
-    resultado = bst.value_set(arbol)
+    resultado = rbt.value_set(arbol)
 
     tf = get_time()
 
@@ -98,7 +109,7 @@ def req_3(catalog, cod_al, cod_ap, rango_d):
     l_vuelos = catalog["flights"]["elements"]
     rango_d = format_rango(rango_d)
 
-    arbol = bst.new_map()
+    arbol = rbt.new_map()
 
     #Recorrido a l_vuelos O(n)
     for vuelo in l_vuelos:
@@ -107,10 +118,10 @@ def req_3(catalog, cod_al, cod_ap, rango_d):
             #Filtrar por rango de distancias
             if rango_d[0] <= vuelo["distance"] <= rango_d[1]:
                 llave = (vuelo["distance"], vuelo["date_hour_arr"])
-                arbol = bst.put(arbol, llave, vuelo)
+                arbol = rbt.put(arbol, llave, vuelo)
 
     #6. Sacar los values en una array list y mandar para el view
-    resultado = bst.value_set(arbol)
+    resultado = rbt.value_set(arbol)
 
     tf = get_time()
 
@@ -124,7 +135,7 @@ def req_4(catalog, r_fechas, f_horaria, n):
     vuelos = catalog["flights"]["elements"]
     r_fechas = format_rango(r_fechas, "f")
     f_horaria = format_rango(f_horaria, "h")
-    heap = hp.new_map(False)
+    heap = hp.new_heap(False)
     aerolineas = {}
 
     for vuelo in vuelos:
@@ -133,35 +144,37 @@ def req_4(catalog, r_fechas, f_horaria, n):
 
                 #Si la aerolinea no está en el diccionario
                 if vuelo["carrier"] not in aerolineas:
-                    aerolineas[vuelo["carrier"]] = {"num_vuelos": 1,
+                    aerolineas[vuelo["carrier"]] = {"Aerolínea": (f"{vuelo['carrier']} - {vuelo['name']}"),
+                                                    "num_vuelos": 1,
                                                     "duracion": vuelo["airtime"],
                                                     "distancia": vuelo["distance"],
-                                                    "vuelo_min_d": vuelo,
-                                                    "codigo": vuelo["carrier"]}
+                                                    "vuelo_min_d": vuelo}
                 #Si la aerolinea ya existe en el diccionario
                 elif vuelo["carrier"] in aerolineas:
                     aerolineas[vuelo["carrier"]]["num_vuelos" ]+= 1
                     aerolineas[vuelo["carrier"]]["duracion"] += vuelo["airtime"]
                     aerolineas[vuelo["carrier"]]["distancia"] += vuelo["distance"]
                     
-                    vm = aerolineas[vuelo["carrier"]]["vuelo_min_d"]
-                    if vm is None:
-                        vm = vuelo
+                    if aerolineas[vuelo["carrier"]]["vuelo_min_d"] is None:
+                        aerolineas[vuelo["carrier"]]["vuelo_min_d"] = vuelo
                     else:
                         d_vuelo = vuelo["airtime"]
-                        d_vm = vm["airtime"]
+                        d_vm = aerolineas[vuelo["carrier"]]["vuelo_min_d"]["airtime"]
                         if d_vuelo < d_vm:
-                            vm = vuelo
-                        elif d_vuelo == d_vm:
-                            if d_vuelo["date_hour_dep"]< d_vm["date_hour_dep"]:
-                                vuelo["carrier"]["vuelo_min_d"] = vuelo
+                            aerolineas[vuelo["carrier"]]["vuelo_min_d"] = vuelo
 
     for codigo in aerolineas.values():
         codigo["duracion"] = codigo["duracion"]/codigo["num_vuelos"]
-        codigo["distancia"] = codigo["distance"]/codigo["num_vuelos"]
-        #Insertar en heap para ordenar de forma descendente\
-        clave = (codigo["num_vuelos"], codigo["codigo"])
-        heap = hp.insert(heap, clave, codigo)
+        codigo["distancia"] = codigo["distancia"]/codigo["num_vuelos"]
+        #Insertar en heap para ordenar de forma descendente
+        codigo["Vuelo de menor duración"] = {"ID": codigo["vuelo_min_d"]["id"], "Código": codigo["vuelo_min_d"]["flight"], 
+                                             "Fecha-Hora programada de salida": dt.combine(codigo["vuelo_min_d"]["date"], codigo["vuelo_min_d"]["sched_dep_time"]),
+                                             "Aeropuerto Origen": codigo["vuelo_min_d"]["origin"],
+                                             "Aeropuerto Destino": codigo["vuelo_min_d"]["dest"],
+                                             "Duración": codigo["vuelo_min_d"]["airtime"]}
+        codigo.pop("vuelo_min_d", None)
+
+        heap = hp.insert(heap, codigo["num_vuelos"], codigo)
 
     lista = []
     i = 0
@@ -172,7 +185,7 @@ def req_4(catalog, r_fechas, f_horaria, n):
         i += 1
     tf = get_time()
     
-    return lista, delta_time(ti,tf)
+    return delta_time(ti,tf), len(lista), lista
 
 def req_6(catalog, rf, rd, n):
 
@@ -183,7 +196,7 @@ def req_6(catalog, rf, rd, n):
     rd = format_rango(rd)
     n =  int(n)
     vuelos = catalog["flights"]
-    arbol = bst.new_map()
+    arbol = rbt.new_map()
     aerolineas = {}
 
     #2. Filtros
