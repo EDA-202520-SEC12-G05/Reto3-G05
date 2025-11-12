@@ -148,7 +148,7 @@ def print_req_3(control, cod_al, cod_ap, rango_d):
    
 
 
-def print_req_4(control):
+def print_req_4(control, r_fechas, ):
     """
         Función que imprime la solución del Requerimiento 4 en consola
     """

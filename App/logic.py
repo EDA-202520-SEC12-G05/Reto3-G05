@@ -111,7 +111,7 @@ def req_3(catalog, cod_al, cod_ap, rango_d):
     return round(delta_time(ti, tf),4), resultado["size"], resultado["elements"]
 
 
-def req_4(catalog, r_fechas, f_horaria, cant_n):
+def req_4(catalog, r_fechas, f_horaria, n):
     
     ti = get_time()
     n = int(n)
