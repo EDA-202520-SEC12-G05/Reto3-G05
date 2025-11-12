@@ -148,12 +148,13 @@ def print_req_3(control, cod_al, cod_ap, rango_d):
    
 
 
-def print_req_4(control, r_fechas, ):
-    """
-        Función que imprime la solución del Requerimiento 4 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 4
-    pass
+def print_req_4(control, r_fechas, f_horaria, n):
+    
+    resultado = lg.req_4(control, r_fechas, f_horaria, n)
+
+    if resultado:
+        lista, tiempo = resultado
+        print(f"\t")
 
 
 def print_req_6(control):
