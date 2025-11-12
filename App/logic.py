@@ -4,7 +4,6 @@ import sys
 import os
 from datetime import datetime as dt
 from datetime import timedelta as td
-from datetime import timedelta as td
 
 csv.field_size_limit(2147483647)
 default_limit = 1000
