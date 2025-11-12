@@ -5,6 +5,8 @@ import os
 from datetime import datetime as dt
 from datetime import timedelta as td
 
+import numpy as np
+
 csv.field_size_limit(2147483647)
 default_limit = 1000
 sys.setrecursionlimit(default_limit*10)
@@ -45,7 +47,6 @@ def load_data(catalog):
         record["arr_time"] = dt.strptime(record["arr_time"], "%H:%M").time()
         record["date_hour_arr"] = dt.combine(record["date"], record["arr_time"])
         record["sched_arr_time"] = dt.strptime(record["sched_arr_time"], "%H:%M").time()
-        record["delay"] = min_dif(record["date"], record["arr_time"], record["sched_arr_time"])
         record["num_flight"] = int(record["flight"])
         record["airtime"] = float(record["air_time"])
         record["distance"] = float(record["distance"])
@@ -93,20 +94,24 @@ def req_1(catalog, cod_aerolinea, rango_min):
 def req_3(catalog, cod_al, cod_ap, rango_d):
     
     ti = get_time()
+
     l_vuelos = catalog["flights"]["elements"]
     rango_d = format_rango(rango_d)
+
     arbol = bst.new_map()
 
+    #Recorrido a l_vuelos O(n)
     for vuelo in l_vuelos:
-
-        #Filtrar por aerolinea y aeropuero destino
+        #1. Filtrar por aerolínea y aeropuerto
         if vuelo["carrier"] == cod_al and vuelo["dest"] == cod_ap:
-            #Filtrar por rango de distancia
-            if  rango_d[0] <= vuelo["distance"] <= rango_d[1]:             
-                    #Insertar al árbol según distancia o fecha y hora de llegada
-                    llave = (vuelo["distance"], vuelo["date_hour_arr"])
-                    bst.put(arbol, llave, vuelo)
+            #Filtrar por rango de distancias
+            if rango_d[0] <= vuelo["distance"] <= rango_d[1]:
+                llave = (vuelo["distance"], vuelo["date_hour_arr"])
+                arbol = bst.put(arbol, llave, vuelo)
+
+    #6. Sacar los values en una array list y mandar para el view
     resultado = bst.value_set(arbol)
+
     tf = get_time()
 
     return round(delta_time(ti, tf),4), resultado["size"], resultado["elements"]
@@ -169,12 +174,71 @@ def req_4(catalog, r_fechas, f_horaria, n):
     
     return lista, delta_time(ti,tf)
 
-def req_6(catalog):
-    """
-    Retorna el resultado del requerimiento 5
-    """
-    # TODO: Modificar el requerimiento 5
-    pass
+def req_6(catalog, rf, rd, n):
+
+    ti = get_time()
+
+    #1. Formatear
+    rf = format_rango(rf, "f")
+    rd = format_rango(rd)
+    n =  int(n)
+    vuelos = catalog["flights"]
+    arbol = bst.new_map()
+    aerolineas = {}
+
+    #2. Filtros
+    for vuelo in vuelos["elements"]:
+        if rf[0] <= vuelo["date"] <= rf[1] and rd[0] <= vuelo["distance"] <= rd[1]:
+            ae = vuelo["carrier"]
+            vuelo["delay"] = min_dif(vuelo["date"], vuelo["dep_time"], vuelo["sched_dep_time"])
+            if ae not in aerolineas:
+                #4.1. Llevar cuenta de: Puntualidad, vuelos, distancia, duración, y elegir el vuelo de mayor distancia
+                vuelos_ae = lt.new_list()
+                lt.add_last(vuelos_ae, vuelo)
+                aerolineas[ae] = {"Aerolínea": (f"{vuelo['carrier']} - {vuelo['name']}"), 
+                                   "vuelos": vuelos_ae,
+                                    "Puntualidad": vuelo["delay"]}
+            else:
+                aerolineas[ae]["vuelos"] = lt.add_last(aerolineas[ae]["vuelos"], vuelo)
+                aerolineas[ae]["Puntualidad"] += vuelo["delay"]
+
+    #Promedios y otros
+    for ae in aerolineas.values():
+        ae["Puntualidad"] = ae["Puntualidad"]/ae["vuelos"]["size"]
+        ae["Desviación Estandar"] = float(desviacione(ae["vuelos"]))
+        ae["vuelo_mr"] = (None, float("inf"))
+
+        for vuelo in ae["vuelos"]["elements"]:
+            if vuelo["delay"] > 0:
+                dif_prom = abs(vuelo["delay"] - ae["Puntualidad"])
+                if dif_prom < ae["vuelo_mr"][1]:
+                     ae["vuelo_mr"] = (vuelo, dif_prom)
+
+        v_mr = ae["vuelo_mr"][0]
+        if v_mr:
+            ae["Vuelo con el retraso más cercano al promedio"] = {
+                "ID": v_mr["id"],
+                "Código": v_mr["flight"],
+                "Fecha-Hora salida": v_mr["date_hour_dep"],
+                "Origen": v_mr["origin"],
+                "Destino": v_mr["dest"]
+            }
+
+            ae.pop("vuelos", None)
+            ae.pop("vuelo_mr", None)
+
+        key = (abs(ae["Desviación Estandar"]), abs(ae["Puntualidad"]))
+        arbol = bst.put(arbol, key, ae)
+
+    #7. Sacar value set
+    values = bst.value_set(arbol) #Values -> Array_list!!!!
+    #8. Sublist hasta N
+    values = lt.sub_list(values, 0, n)
+    #9. Retornar
+    tf = get_time()
+
+    return round(delta_time(ti, tf), 4), values["size"], values["elements"]
+    
 
 def req_5(catalog, rango_f, cod, n):
 
@@ -194,13 +258,13 @@ def req_5(catalog, rango_f, cod, n):
             if car not in aerolineas:
                 #4.1. Llevar cuenta de: Puntualidad, vuelos, distancia, duración, y elegir el vuelo de mayor distancia
                 aerolineas[car] = {"Aerolínea": (f"{vuelo['carrier']} - {vuelo['name']}"), 
-                                         "Puntualidad": vuelo['delay'],
+                                         "Puntualidad": min_dif(vuelo["date"], vuelo["arr_time"], vuelo["sched_arr_time"]),
                                          "Cantidad de vuelos": 1,
                                          "Duración Promedio": vuelo['airtime'],
                                          "Distancia Promedio": vuelo['distance'],
                                          "Vuelo de mayor distancia": vuelo}
             else:
-                aerolineas[car]['Puntualidad'] += vuelo["delay"]
+                aerolineas[car]['Puntualidad'] += min_dif(vuelo["date"], vuelo["arr_time"], vuelo["sched_arr_time"])
                 aerolineas[car]['Cantidad de vuelos'] += 1
                 aerolineas[car]['Duración Promedio'] += vuelo["airtime"]
                 aerolineas[car]['Distancia Promedio'] += vuelo['distance']
@@ -284,3 +348,9 @@ def format_rango(rango, tipo="n"):
         return (dt.strptime(l_rango[0], "%H:%M").time(), dt.strptime(l_rango[1], "%H:%M").time())
     #Por default viene para formatear números
     return (int(l_rango[0]), int(l_rango[1]))
+
+def desviacione(lista):
+    valores = []
+    for vuelo in lista["elements"]:
+        valores.append(vuelo["delay"])
+    return float(np.std(valores, ddof=1))
