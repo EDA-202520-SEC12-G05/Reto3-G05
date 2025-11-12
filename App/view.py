@@ -39,6 +39,7 @@ def print_records(records, n):
     for record in records_imprimir:
         filas.append([
             record["id"],
+            record["id"],
             record["date"],
             record["dep_time"],
             record["arr_time"],
@@ -48,6 +49,7 @@ def print_records(records, n):
             record["air_time"],
             record["distance"]])
 
+    headers = ["ID", "Fecha", "Hora Real de Salida", "Hora Real de llegada", "Aerolínea", "ID Aeronave", "Aeropuerto Origen y Aeropuerto Destino", "Duración (min)", "Distancia (mi)"]
     headers = ["ID", "Fecha", "Hora Real de Salida", "Hora Real de llegada", "Aerolínea", "ID Aeronave", "Aeropuerto Origen y Aeropuerto Destino", "Duración (min)", "Distancia (mi)"]
     
     print(tab(filas, headers=headers, tablefmt="rounded_grid"))
@@ -187,6 +189,9 @@ def main():
                 print("Últimos 5 vuelos registrados:")
                 print_records(records, -5)
         elif int(inputs) == 1:
+            codigo = input("Ingrese el código de la aerolínea buscada: ")
+            rango = input("Ingrese el rango de minutos de retraso en salida a filtrar (formato [inicio, final]): ")
+            print_req_1(control, codigo, rango)
             codigo = input("Ingrese el código de la aerolínea buscada: ")
             rango = input("Ingrese el rango de minutos de retraso en salida a filtrar (formato [inicio, final]): ")
             print_req_1(control, codigo, rango)

@@ -4,6 +4,7 @@ import sys
 import os
 from datetime import datetime as dt
 from datetime import timedelta as td
+from datetime import timedelta as td
 
 csv.field_size_limit(2147483647)
 default_limit = 1000
@@ -13,11 +14,13 @@ data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/Challenge-3'
 
 from DataStructures.List import array_list as lt
 from DataStructures.Tree.BSTree import binary_search_tree as bst
+from DataStructures.Tree.BSTree import binary_search_tree as bst
 
 def new_logic():
     """
     Crea el catalogo para almacenar las estructuras de datos
     """
+    catalog = {"flights": lt.new_list()}
     catalog = {"flights": lt.new_list()}
     
     return catalog
@@ -50,10 +53,13 @@ def load_data(catalog):
         record["distance"] = float(record["distance"])
 
         lt.add_last(catalog["flights"], record)
+        lt.add_last(catalog["flights"], record)
 
+    lt.quick_sort(catalog["flights"], cmp_f_loadata)
     lt.quick_sort(catalog["flights"], cmp_f_loadata)
     tf = get_time()
     
+    return catalog["flights"]["elements"], catalog["flights"]["size"], round(delta_time(ti, tf), 4)
     return catalog["flights"]["elements"], catalog["flights"]["size"], round(delta_time(ti, tf), 4)
 
 # Funciones de consulta sobre el catálogo
