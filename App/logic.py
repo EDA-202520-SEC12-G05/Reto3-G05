@@ -39,9 +39,10 @@ def load_data(catalog):
         record["id"] = int(record["id"])
         record["date"] = dt.strptime(record["date"], '%Y-%m-%d').date()
         record["dep_time"] = dt.strptime(record["dep_time"], "%H:%M").time()
-        record["date_hour"] = dt.combine(record["date"], record["dep_time"])
+        record["date_hour_dep"] = dt.combine(record["date"], record["dep_time"])
         record["sched_dep_time"] = dt.strptime(record["sched_dep_time"], "%H:%M").time()
         record["arr_time"] = dt.strptime(record["arr_time"], "%H:%M").time()
+        record["date_hour_arr"] = dt.combine(record["date"], record["arr_time"])
         record["sched_arr_time"] = dt.strptime(record["sched_arr_time"], "%H:%M").time()
         record["num_flight"] = int(record["flight"])
         record["airtime"] = float(record["air_time"])
@@ -76,7 +77,7 @@ def req_1(catalog, cod_aerolinea, rango_min):
             if dif_min > 0 and rango_min[0] <= dif_min <= rango_min[1]:
                 vuelo["delay"] = dif_min
                 #5. Añadir al bst con la llave siendo tupla (delay, date_hour) para que se encargue de organizarlos él solito
-                llave = (vuelo["delay"], vuelo["date_hour"])
+                llave = (vuelo["delay"], vuelo["date_hour_dep"])
                 bst.put(arbol, llave, vuelo)
 
     #6. Sacar los values en una array list y mandar para el view
@@ -87,12 +88,26 @@ def req_1(catalog, cod_aerolinea, rango_min):
     return round(delta_time(ti, tf),4), resultado["size"], resultado["elements"]
 
 
-def req_3(catalog):
-    """
-    Retorna el resultado del requerimiento 3
-    """
-    # TODO: Modificar el requerimiento 3
-    pass
+def req_3(catalog, cod_al, cod_ap, rango_d):
+    
+    ti = get_time()
+    l_vuelos = catalog["flights"]["elements"]
+    rango_d = format_rango(rango_d)
+    arbol = bst.new_map()
+
+    for vuelo in l_vuelos:
+
+        #Filtrar por aerolinea y aeropuero destino
+        if vuelo["carrier"] == cod_al and vuelo["dest"] == cod_ap:
+            #Filtrar por rango de distancia
+            if  rango_d[0] <= vuelo["distance"] <= rango_d[1]:             
+                    #Insertar al árbol según distancia o fecha y hora de llegada
+                    llave = (vuelo["distance"], vuelo["date_hour_arr"])
+                    bst.put(arbol, llave, vuelo)
+    resultado = bst.value_set(arbol)
+    tf = get_time()
+
+    return round(delta_time(ti, tf),4), resultado["size"], resultado["elements"]
 
 
 def req_4(catalog):
@@ -136,7 +151,7 @@ def delta_time(start, end):
 
 #Auxiliares
 def cmp_f_loadata(reg1, reg2):
-    return reg1["date_hour"] < reg2["date_hour"]
+    return reg1["date_hour_arr"] < reg2["date_hour_arr"]
 
 def min_dif(fecha, hreal, hsch):
 
