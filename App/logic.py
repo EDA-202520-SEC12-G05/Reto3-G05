@@ -4,7 +4,6 @@ import sys
 import os
 from datetime import datetime as dt
 from datetime import timedelta as td
-from datetime import timedelta as td
 
 csv.field_size_limit(2147483647)
 default_limit = 1000
@@ -13,7 +12,6 @@ sys.setrecursionlimit(default_limit*10)
 data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/Challenge-3'
 
 from DataStructures.List import array_list as lt
-from DataStructures.Tree.BSTree import binary_search_tree as bst
 from DataStructures.Tree.BSTree import binary_search_tree as bst
 
 def new_logic():
