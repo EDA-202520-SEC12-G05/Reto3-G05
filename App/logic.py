@@ -139,7 +139,7 @@ def req_4(catalog, r_fechas, f_horaria, n):
                                                     "vuelo_min_d": vuelo,
                                                     "codigo": vuelo["carrier"]}
                 #Si la aerolinea ya existe en el diccionario
-                if vuelo["carrier"] in aerolineas:
+                elif vuelo["carrier"] in aerolineas:
                     aerolineas[vuelo["carrier"]]["num_vuelos" ]+= 1
                     aerolineas[vuelo["carrier"]]["duracion"] += vuelo["airtime"]
                     aerolineas[vuelo["carrier"]]["distancia"] += vuelo["distance"]
@@ -153,15 +153,15 @@ def req_4(catalog, r_fechas, f_horaria, n):
                         if d_vuelo < d_vm:
                             vm = vuelo
                         elif d_vuelo == d_vm:
-                            ""
-
-
+                            if d_vuelo["date_hour_dep"]< d_vm["date_hour_dep"]:
+                                vuelo["carrier"]["vuelo_min_d"] = vuelo
 
     for codigo in aerolineas.values():
         codigo["duracion"] = codigo["duracion"]/codigo["num_vuelos"]
         codigo["distancia"] = codigo["distance"]/codigo["num_vuelos"]
-        #Insertar en heap para ordenar de forma descendente
-        heap = hp.insert(heap, codigo["num_vuelos"], codigo)
+        #Insertar en heap para ordenar de forma descendente\
+        clave = (codigo["num_vuelos"], codigo["codigo"])
+        heap = hp.insert(heap, clave, codigo)
 
     lista = []
     i = 0
