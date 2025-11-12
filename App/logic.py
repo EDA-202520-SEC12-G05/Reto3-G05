@@ -93,20 +93,24 @@ def req_1(catalog, cod_aerolinea, rango_min):
 def req_3(catalog, cod_al, cod_ap, rango_d):
     
     ti = get_time()
+
     l_vuelos = catalog["flights"]["elements"]
     rango_d = format_rango(rango_d)
+
     arbol = bst.new_map()
 
+    #Recorrido a l_vuelos O(n)
     for vuelo in l_vuelos:
-
-        #Filtrar por aerolinea y aeropuero destino
+        #1. Filtrar por aerolínea y aeropuerto
         if vuelo["carrier"] == cod_al and vuelo["dest"] == cod_ap:
-            #Filtrar por rango de distancia
-            if  rango_d[0] <= vuelo["distance"] <= rango_d[1]:             
-                    #Insertar al árbol según distancia o fecha y hora de llegada
-                    llave = (vuelo["distance"], vuelo["date_hour_arr"])
-                    bst.put(arbol, llave, vuelo)
+            #Filtrar por rango de distancias
+            if rango_d[0] <= vuelo["distance"] <= rango_d[1]:
+                llave = (vuelo["distance"], vuelo["date_hour_arr"])
+                arbol = bst.put(arbol, llave, vuelo)
+
+    #6. Sacar los values en una array list y mandar para el view
     resultado = bst.value_set(arbol)
+
     tf = get_time()
 
     return round(delta_time(ti, tf),4), resultado["size"], resultado["elements"]
