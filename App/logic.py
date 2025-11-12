@@ -148,7 +148,7 @@ def req_4(catalog, r_fechas, f_horaria, n):
                         if d_vuelo < d_vm:
                             vm = vuelo
                         elif d_vuelo == d_vm:
-                            aaa
+                            ""
 
 
 
