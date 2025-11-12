@@ -144,13 +144,22 @@ def print_req_3(control, cod_al, cod_ap, rango_d):
         print("\nNo se hallaron registros que coincidieran con la búsqueda.")
         print("\n")
 
-def print_req_4(control):
-    """
-        Función que imprime la solución del Requerimiento 4 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 4
-    pass
+def print_req_4(control, rf, fh, n):
+    resultado = lg.req_4(control, rf, fh, n)
 
+    if resultado:
+        tiempo, cant, records = resultado
+        print(f"\tTiempo total de ejecución: {tiempo}")
+        print(f"\tNúmero total de aerolíneas consideradas: {cant}")
+
+        for aerolin in records:
+            aerolin["Vuelo de menor duración"] = tab(aerolin["Vuelo de menor duración"].items(), tablefmt="simple_grid")
+        
+        print_table(records, cant, ver=True)
+
+    else:
+        print("\nNo se hallaron registros que coincidieran con la búsqueda.")
+        print("\n")
 
 def print_req_6(control, rf, rd, n):
 
@@ -228,7 +237,10 @@ def main():
             print_req_3(control, cod_al, cod_ap, rango_d)
 
         elif int(inputs) == 4:
-            print_req_4(control)
+            rf = input("Ingrese el rango de fechas a filtrar (formato [inicio, final]): ")
+            fh = input("Ingrese la franja horaria a filtrar (formato [HH:MM, HH:MM]): ")
+            n = input("Ingrese la cantidad N de aerolíneas a considerar: ")
+            print_req_4(control, rf, fh, n)
 
         elif int(inputs) == 5:
             rango = input("Ingrese el rango de fechas a filtrar (formato [inicio, final]): ")
