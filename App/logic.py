@@ -120,18 +120,11 @@ def req_4(catalog, r_fechas, f_horaria, n):
     r_fechas = format_rango(r_fechas, "f")
     f_horaria = format_rango(f_horaria, "h")
     heap = hp.new_map(False)
+    aerolineas = {}
 
     for vuelo in vuelos:
         if r_fechas[0]<= vuelo["date"] <= r_fechas[1]:
             if f_horaria[0] <= vuelo["dep_time"] <= f_horaria[1]:
-
-                aerolineas = {
-                    vuelo["carrier"]: {"num_vuelos": 0,
-                                       "duracion": 0,
-                                       "distancia": 0,
-                                       "vuelo_min_d": vuelo,
-                                       "codigo": vuelo["carrier"]}
-                }
 
                 #Si la aerolinea no está en el diccionario
                 if vuelo["carrier"] not in aerolineas:
@@ -145,8 +138,19 @@ def req_4(catalog, r_fechas, f_horaria, n):
                     aerolineas[vuelo["carrier"]]["num_vuelos" ]+= 1
                     aerolineas[vuelo["carrier"]]["duracion"] += vuelo["airtime"]
                     aerolineas[vuelo["carrier"]]["distancia"] += vuelo["distance"]
-                    if vuelo["airtime"] < aerolineas[vuelo["carrier"]["vuelo_min_d"]]:
-                        aerolineas[vuelo["carrier"]]["vuelo_min_d"] = vuelo
+                    
+                    vm = aerolineas[vuelo["carrier"]]["vuelo_min_d"]
+                    if vm is None:
+                        vm = vuelo
+                    else:
+                        d_vuelo = vuelo["airtime"]
+                        d_vm = vm["airtime"]
+                        if d_vuelo < d_vm:
+                            vm = vuelo
+                        elif d_vuelo == d_vm:
+                            aaa
+
+
 
     for codigo in aerolineas.values():
         codigo["duracion"] = codigo["duracion"]/codigo["num_vuelos"]
