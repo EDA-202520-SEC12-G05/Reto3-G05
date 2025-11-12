@@ -21,7 +21,6 @@ def new_logic():
     Crea el catalogo para almacenar las estructuras de datos
     """
     catalog = {"flights": lt.new_list()}
-    catalog = {"flights": lt.new_list()}
     
     return catalog
 
@@ -51,15 +50,12 @@ def load_data(catalog):
         record["num_flight"] = int(record["flight"])
         record["airtime"] = float(record["air_time"])
         record["distance"] = float(record["distance"])
-
+        
         lt.add_last(catalog["flights"], record)
-        lt.add_last(catalog["flights"], record)
 
-    lt.quick_sort(catalog["flights"], cmp_f_loadata)
     lt.quick_sort(catalog["flights"], cmp_f_loadata)
     tf = get_time()
     
-    return catalog["flights"]["elements"], catalog["flights"]["size"], round(delta_time(ti, tf), 4)
     return catalog["flights"]["elements"], catalog["flights"]["size"], round(delta_time(ti, tf), 4)
 
 # Funciones de consulta sobre el catálogo

@@ -192,9 +192,6 @@ def main():
             codigo = input("Ingrese el código de la aerolínea buscada: ")
             rango = input("Ingrese el rango de minutos de retraso en salida a filtrar (formato [inicio, final]): ")
             print_req_1(control, codigo, rango)
-            codigo = input("Ingrese el código de la aerolínea buscada: ")
-            rango = input("Ingrese el rango de minutos de retraso en salida a filtrar (formato [inicio, final]): ")
-            print_req_1(control, codigo, rango)
 
         elif int(inputs) == 3:
             print_req_3(control)
