@@ -15,6 +15,7 @@ data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/Challenge-3'
 
 from DataStructures.List import array_list as lt
 from DataStructures.Tree.BSTree import binary_search_tree as bst
+from DataStructures.Tree.RBTree import red_black_tree as rbt
 
 def new_logic():
     """
@@ -67,7 +68,7 @@ def req_1(catalog, cod_aerolinea, rango_min):
     l_vuelos = catalog["flights"]["elements"]
     rango_min = format_rango(rango_min)
 
-    arbol = bst.new_map()
+    arbol = rbt.new_map()
 
     #Recorrido a l_vuelos O(n)
     for vuelo in l_vuelos:
@@ -80,10 +81,10 @@ def req_1(catalog, cod_aerolinea, rango_min):
                 vuelo["delay"] = dif_min
                 #5. Añadir al bst con la llave siendo tupla (delay, date_hour_dep) para que se encargue de organizarlos él solito
                 llave = (vuelo["delay"], vuelo["date_hour_dep"])
-                bst.put(arbol, llave, vuelo)
+                rbt.put(arbol, llave, vuelo)
 
     #6. Sacar los values en una array list y mandar para el view
-    resultado = bst.value_set(arbol)
+    resultado = rbt.value_set(arbol)
 
     tf = get_time()
 
@@ -97,7 +98,7 @@ def req_3(catalog, cod_al, cod_ap, rango_d):
     l_vuelos = catalog["flights"]["elements"]
     rango_d = format_rango(rango_d)
 
-    arbol = bst.new_map()
+    arbol = rbt.new_map()
 
     #Recorrido a l_vuelos O(n)
     for vuelo in l_vuelos:
@@ -106,10 +107,10 @@ def req_3(catalog, cod_al, cod_ap, rango_d):
             #Filtrar por rango de distancias
             if rango_d[0] <= vuelo["distance"] <= rango_d[1]:
                 llave = (vuelo["distance"], vuelo["date_hour_arr"])
-                arbol = bst.put(arbol, llave, vuelo)
+                arbol = rbt.put(arbol, llave, vuelo)
 
     #6. Sacar los values en una array list y mandar para el view
-    resultado = bst.value_set(arbol)
+    resultado = rbt.value_set(arbol)
 
     tf = get_time()
 
@@ -133,7 +134,7 @@ def req_6(catalog, rf, rd, n):
     rd = format_rango(rd)
     n =  int(n)
     vuelos = catalog["flights"]
-    arbol = bst.new_map()
+    arbol = rbt.new_map()
     aerolineas = {}
 
     #2. Filtros
@@ -178,10 +179,10 @@ def req_6(catalog, rf, rd, n):
             ae.pop("vuelo_mr", None)
 
         key = (abs(ae["Desviación Estandar"]), abs(ae["Puntualidad"]))
-        arbol = bst.put(arbol, key, ae)
+        arbol = rbt.put(arbol, key, ae)
 
     #7. Sacar value set
-    values = bst.value_set(arbol) #Values -> Array_list!!!!
+    values = rbt.value_set(arbol) #Values -> Array_list!!!!
     #8. Sublist hasta N
     values = lt.sub_list(values, 0, n)
     #9. Retornar
@@ -199,7 +200,7 @@ def req_5(catalog, rango_f, cod, n):
     n = int(n)
     vuelos = catalog["flights"] #Array_list!!!
     aerolineas = {}
-    arbol = bst.new_map()
+    arbol = rbt.new_map()
     #2. Aplicar filtros
     for vuelo in vuelos["elements"]:#O(n)
         if rango_f[0] <= vuelo["date"] <= rango_f[1] and vuelo["dest"] == cod:
@@ -243,10 +244,10 @@ def req_5(catalog, rango_f, cod, n):
                                         "Duracion": vuelom['airtime']}
                 #6. Meter al arbol con tupla (puntualidad, cod)
                 key = (abs(aerolinea["Puntualidad"]), aer)
-                arbol = bst.put(arbol, key, aerolinea)
+                arbol = rbt.put(arbol, key, aerolinea)
 
     #7. Sacar value set
-    values = bst.value_set(arbol) #Values -> Array_list!!!!
+    values = rbt.value_set(arbol) #Values -> Array_list!!!!
     #8. Sublist hasta N
     values = lt.sub_list(values, 0, n)
     #9. Retornar

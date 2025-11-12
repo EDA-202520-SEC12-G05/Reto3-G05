@@ -129,9 +129,9 @@ def value_set(bst):
 
 def value_set_tree(node, result):
     if node is not None:
-        bs._inorder(node["left"], result)
+        value_set_tree(node["left"], result)
         sll.add_last(result, node["value"])
-        bs._inorder(node["right"], result)
+        value_set_tree(node["right"], result)
     return result
 
 def delete_min(bst):
